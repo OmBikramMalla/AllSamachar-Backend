@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="AllSamachar.Api/AllSamachar.Api.csproj" />
+  <Project Path="AllSamachar.Application/AllSamachar.Application.csproj" />
+  <Project Path="AllSamachar.Domain/AllSamachar.Domain.csproj" />
+  <Project Path="AllSamachar.Infrastructure/AllSamachar.Infrastructure.csproj" />
+</Solution>
