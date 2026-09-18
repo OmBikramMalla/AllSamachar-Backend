@@ -10,7 +10,19 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+
 builder.Services.AddOpenApi();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("https://allsamachar.com", "https://www.allsamachar.com")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -51,6 +63,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
