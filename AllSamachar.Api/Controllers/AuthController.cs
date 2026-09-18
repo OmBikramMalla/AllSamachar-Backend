@@ -2,7 +2,9 @@
 using AllSamachar.Application.Dtos;
 using AllSamachar.Application.Interfaces;
 using AllSamachar.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace AllSamachar.Api.Controllers;
 
@@ -81,6 +83,25 @@ public class AuthController : ControllerBase
             Name = user.Name,
             Email = user.Email,
             Role = user.Role.ToString()
+        });
+    }
+
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<IActionResult> Me()
+    {
+        var sub = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+        var userId = Guid.Parse(sub!);
+
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null) return NotFound();
+
+        return Ok(new
+        {
+            userId = user.Id,
+            name = user.Name,
+            email = user.Email,
+            role = user.Role.ToString()
         });
     }
 }
