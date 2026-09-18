@@ -23,6 +23,14 @@ public class NewsRepository : INewsRepository
             .FirstOrDefaultAsync(n => n.Slug == slug);
     }
 
+    public async Task<News?> GetByIdAsync(Guid id)
+    {
+        return await _context.News
+            .Include(n => n.Category)
+            .Include(n => n.Publisher)
+            .FirstOrDefaultAsync(n => n.Id == id);
+    }
+
     public async Task<PagedResult<News>> GetLatestAsync(int page, int pageSize)
     {
         var query = _context.News

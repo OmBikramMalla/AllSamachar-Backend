@@ -16,4 +16,5 @@ public interface INewsRepository
     Task AddAsync(News news);
     Task UpdateAsync(News news);
     Task DeleteAsync(Guid id);
+    Task<News?> GetByIdAsync(Guid id);
 }

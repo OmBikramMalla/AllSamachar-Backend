@@ -1,6 +1,8 @@
-﻿using AllSamachar.Application.Dtos;
+﻿using AllSamachar.Application.Common;
+using AllSamachar.Application.Dtos;
 using AllSamachar.Application.Interfaces;
 using AllSamachar.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AllSamachar.Api.Controllers;
@@ -133,6 +135,89 @@ public class NewsController : ControllerBase
         news.OriginalClickCount += 1;
         await _newsRepository.UpdateAsync(news);
         return NoContent();
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] UpsertNewsRequest request)
+    {
+        if (request.IsBreaking)
+        {
+            await ClearExistingBreakingAsync();
+        }
+
+        var news = new News
+        {
+            Id = Guid.NewGuid(),
+            Slug = SlugHelper.GenerateSlug(request.Title),
+            Title = request.Title,
+            Summary = request.Summary,
+            ImageUrl = request.ImageUrl,
+            CategoryId = request.CategoryId,
+            PublisherId = request.PublisherId,
+            Author = request.Author,
+            OriginalUrl = request.OriginalUrl,
+            PublishedAt = request.PublishedAt ?? DateTime.UtcNow,
+            Tags = request.Tags,
+            Status = Enum.Parse<NewsStatus>(request.Status),
+            IsBreaking = request.IsBreaking
+        };
+
+        await _newsRepository.AddAsync(news);
+
+        var created = await _newsRepository.GetByIdAsync(news.Id);
+        return Ok(ToDto(created!));
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpsertNewsRequest request)
+    {
+        var news = await _newsRepository.GetByIdAsync(id);
+        if (news == null) return NotFound();
+
+        if (request.IsBreaking && !news.IsBreaking)
+        {
+            await ClearExistingBreakingAsync();
+        }
+
+        // Slug intentionally never changes on edit — a published URL should stay stable.
+        news.Title = request.Title;
+        news.Summary = request.Summary;
+        news.ImageUrl = request.ImageUrl;
+        news.CategoryId = request.CategoryId;
+        news.PublisherId = request.PublisherId;
+        news.Author = request.Author;
+        news.OriginalUrl = request.OriginalUrl;
+        news.Tags = request.Tags;
+        news.Status = Enum.Parse<NewsStatus>(request.Status);
+        news.IsBreaking = request.IsBreaking;
+
+        await _newsRepository.UpdateAsync(news);
+
+        var updated = await _newsRepository.GetByIdAsync(id);
+        return Ok(ToDto(updated!));
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var news = await _newsRepository.GetByIdAsync(id);
+        if (news == null) return NotFound();
+
+        await _newsRepository.DeleteAsync(id);
+        return NoContent();
+    }
+
+    private async Task ClearExistingBreakingAsync()
+    {
+        var currentBreaking = await _newsRepository.GetBreakingAsync();
+        if (currentBreaking != null)
+        {
+            currentBreaking.IsBreaking = false;
+            await _newsRepository.UpdateAsync(currentBreaking);
+        }
     }
 
     private static NewsDto ToDto(News n) => new()
