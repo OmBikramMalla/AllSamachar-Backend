@@ -1,3 +1,4 @@
+using AllSamachar.Application.Common;
 using AllSamachar.Application.Interfaces;
 using AllSamachar.Infrastructure.Data;
 using AllSamachar.Infrastructure.Repositories;
@@ -17,6 +18,8 @@ builder.Services.AddScoped<IPublisherRepository, PublisherRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ISavedStoryRepository, SavedStoryRepository>();
 builder.Services.AddScoped<IReadingHistoryRepository, ReadingHistoryRepository>();
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
+builder.Services.AddScoped<JwtTokenGenerator>();
 
 var app = builder.Build();
 
