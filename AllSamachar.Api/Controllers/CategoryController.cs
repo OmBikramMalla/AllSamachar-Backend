@@ -1,6 +1,7 @@
 ﻿using AllSamachar.Application.Dtos;
 using AllSamachar.Application.Interfaces;
 using AllSamachar.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AllSamachar.Api.Controllers;
@@ -46,6 +47,7 @@ public class CategoryController : ControllerBase
         return Ok(new CategoryDto { Id = category.Id, Slug = category.Slug, Name = category.Name, AccentColor = category.AccentColor });
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] Category category)
     {
@@ -54,6 +56,7 @@ public class CategoryController : ControllerBase
         return Ok(category);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] Category category)
     {
@@ -62,6 +65,7 @@ public class CategoryController : ControllerBase
         return NoContent();
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {

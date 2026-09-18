@@ -1,6 +1,7 @@
 ﻿using AllSamachar.Application.Dtos;
 using AllSamachar.Application.Interfaces;
 using AllSamachar.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AllSamachar.Api.Controllers;
@@ -47,6 +48,7 @@ public class PublisherController : ControllerBase
         return Ok(new PublisherDto { Id = publisher.Id, Slug = publisher.Slug, Name = publisher.Name, Website = publisher.Website, Description = publisher.Description });
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] Publisher publisher)
     {
@@ -55,6 +57,7 @@ public class PublisherController : ControllerBase
         return Ok(publisher);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] Publisher publisher)
     {
@@ -63,6 +66,7 @@ public class PublisherController : ControllerBase
         return NoContent();
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
