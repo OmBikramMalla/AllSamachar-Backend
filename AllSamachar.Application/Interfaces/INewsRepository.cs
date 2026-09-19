@@ -12,6 +12,7 @@ public interface INewsRepository
     Task<PagedResult<News>> GetMostReadAsync(int page, int pageSize);
     Task<News?> GetBreakingAsync();
     Task<PagedResult<News>> SearchAsync(string query, string? categorySlug, int page, int pageSize);
+    Task<PagedResult<News>> GetAllForAdminAsync(string? status, int page, int pageSize);
 
     Task AddAsync(News news);
     Task UpdateAsync(News news);

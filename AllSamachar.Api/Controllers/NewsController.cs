@@ -240,4 +240,19 @@ public class NewsController : ControllerBase
         SaveCount = n.SaveCount,
         OriginalClickCount = n.OriginalClickCount
     };
+
+    [Authorize(Roles = "Admin")]
+    [HttpGet("admin/all")]
+    public async Task<IActionResult> GetAllForAdmin([FromQuery] string? status, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+    {
+        var result = await _newsRepository.GetAllForAdminAsync(status, page, pageSize);
+        return Ok(new
+        {
+            items = result.Items.Select(ToDto),
+            result.Page,
+            result.PageSize,
+            result.TotalCount,
+            result.TotalPages
+        });
+    }
 }

@@ -139,4 +139,19 @@ public class NewsRepository : INewsRepository
             TotalCount = totalCount
         };
     }
+
+    public async Task<PagedResult<News>> GetAllForAdminAsync(string? status, int page, int pageSize)
+    {
+        var query = _context.News
+            .Include(n => n.Category)
+            .Include(n => n.Publisher)
+            .AsQueryable();
+
+        if (!string.IsNullOrEmpty(status) && Enum.TryParse<NewsStatus>(status, true, out var parsedStatus))
+        {
+            query = query.Where(n => n.Status == parsedStatus);
+        }
+
+        return await PaginateAsync(query.OrderByDescending(n => n.PublishedAt), page, pageSize);
+    }
 }
